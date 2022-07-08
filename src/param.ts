@@ -13,6 +13,9 @@
 
 import { PathParam } from "./interfaces/types";
 
-export function param<T extends string>(t: T): PathParam<T> {
-  return { param: t };
+export function param<T extends string>(
+  t: T,
+  isOptional = false
+): PathParam<T> {
+  return { param: t, isOptional };
 }

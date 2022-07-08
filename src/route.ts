@@ -10,9 +10,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-
-import { PathPart, Route } from "./interfaces/types";
 import { isParam } from "./interfaces/guards";
+import { PathPart, Route } from "./interfaces/types";
 import { parse as _parse } from "./parse";
 
 export type RouteCreator = <
@@ -32,12 +31,15 @@ function _routeCreator<
   T extends Array<PathPart<any>>,
   Q extends Array<string> = []
 >(pathParts: Array<PathPart<any>>, queryParams: Q): Route<T, Q> {
+  // @ts-expect-error will fix later
   return {
     template: () => {
       return (
         "/" +
         pathParts
-          .map((part) => (isParam(part) ? `:${part.param}` : part))
+          .map((part) =>
+            isParam(part) ? `:${part.param}${part.isOptional ? "?" : ""}` : part
+          )
           .join("/")
       );
     },

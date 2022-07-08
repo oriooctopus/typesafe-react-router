@@ -20,10 +20,13 @@ export interface Route<
 > {
   template(): string;
 
-  create(
-    params: Record<ParamsFromPathArray<Parts>[number], string> &
-      Partial<{ query: Partial<Record<QueryParams[number], string>> }>
-  ): string;
+  CreationParams: ParamsFromPathArray<Parts>;
+
+  // create(
+  //   params: ParamsFromPathArray<Parts> &
+  //     Partial<{ query: Partial<Record<QueryParams[number], string>> }>,
+  // ): string;
+  create(params: ParamsFromPathArray<Parts>): string;
 
   withQueryParams: <T extends string[]>(
     ...params: T
@@ -34,13 +37,40 @@ export interface Route<
 
 export interface PathParam<T extends string> {
   param: T;
+  isOptional: boolean;
 }
 
 export type PathPart<T extends string> = string | PathParam<T>;
 
-export type ParamsFromPathArray<T extends Array<PathPart<any>>> = {
-  [K in keyof T]: T[K] extends PathParam<infer ParamName> ? ParamName : never;
+// export type ParamsFromPathArray<T extends Array<PathPart<any>>> = {
+//   [K in keyof T]: T[K] extends PathParam<infer ParamName> & { isOptional: true }
+//     ? ParamName
+//     : never;
+// };
+
+type TupleToObject<T extends [any, any]> = {
+  [key in T[0]]: Extract<T, [key, any]>[1];
 };
+
+/**
+ * TODO:
+ * So the way to avoid having to put in x: undefined on
+ * params you don't want to supply is to basically run
+ * this twice. The first one is like the one below (I
+ * think, as long as the second one's merge overrides).
+ * The second only returns tuples for the nullable
+ * properties and therefore we can hardcode ? in there
+ */
+export type ParamsFromPathArray<T extends Array<PathPart<any>>> = TupleToObject<
+  // @ts-expect-error will fix later
+  {
+    [K in keyof T]: T[K] extends PathParam<infer ParamName>
+      ? T[K] extends PathParam<any>
+        ? [ParamName, string | undefined]
+        : [ParamName, string]
+      : [];
+  }[number]
+>;
 
 // Given the parameters of a route I want an object of { paramName: string }
 // e.g. for const Route = route(['logbook', param('logbookId'), param('otherId')]);
@@ -49,5 +79,5 @@ export type RouteParams<T extends Route<any, any>> = T extends Route<
   infer X,
   any
 >
-  ? Record<ParamsFromPathArray<X>[number], string>
+  ? ParamsFromPathArray<X>
   : never;
