@@ -24,12 +24,14 @@
     "tsc": "tsc --declaration -outDir dest",
     "clean": "rm -rf dest",
     "prepare": "npm run clean && npm run tsc",
-    "test": "jest"
+    "test": "jest",
+    "format": "yarn prettier --write ."
   },
   "devDependencies": {
     "@types/jest": "^23.1.1",
     "@types/query-string": "^5.1.0",
     "jest": "^23.2.0",
+    "prettier": "^2.7.1",
     "ts-jest": "^22.4.6",
     "typescript": "^3.0.1"
   },
